@@ -50,12 +50,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/pierreminiggio/php-github-action-run.git",
-                "reference": "23a96a4683179d01d65c4a6e227129c8594aa3b5"
+                "reference": "6b5feefd13e261fc8695b4a9dfd2f1f6eb2966d7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pierreminiggio/php-github-action-run/zipball/23a96a4683179d01d65c4a6e227129c8594aa3b5",
-                "reference": "23a96a4683179d01d65c4a6e227129c8594aa3b5",
+                "url": "https://api.github.com/repos/pierreminiggio/php-github-action-run/zipball/6b5feefd13e261fc8695b4a9dfd2f1f6eb2966d7",
+                "reference": "6b5feefd13e261fc8695b4a9dfd2f1f6eb2966d7",
                 "shasum": ""
             },
             "require": {
@@ -78,9 +78,9 @@
             ],
             "support": {
                 "issues": "https://github.com/pierreminiggio/php-github-action-run/issues",
-                "source": "https://github.com/pierreminiggio/php-github-action-run/tree/1.0.0"
+                "source": "https://github.com/pierreminiggio/php-github-action-run/tree/1.0.1"
             },
-            "time": "2021-04-29T18:50:47+00:00"
+            "time": "2021-04-29T23:15:47+00:00"
         },
         {
             "name": "pierreminiggio/github-action-run-artifacts-lister",
@@ -164,12 +164,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/pierreminiggio/php-github-action-run-detailer.git",
-                "reference": "ced7361daca404f4cf3b27a5aa2a1923aed781f3"
+                "reference": "856e5f2da2375b4f3c8f81900d5f835eba117420"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pierreminiggio/php-github-action-run-detailer/zipball/ced7361daca404f4cf3b27a5aa2a1923aed781f3",
-                "reference": "ced7361daca404f4cf3b27a5aa2a1923aed781f3",
+                "url": "https://api.github.com/repos/pierreminiggio/php-github-action-run-detailer/zipball/856e5f2da2375b4f3c8f81900d5f835eba117420",
+                "reference": "856e5f2da2375b4f3c8f81900d5f835eba117420",
                 "shasum": ""
             },
             "require": {
@@ -193,9 +193,9 @@
             ],
             "support": {
                 "issues": "https://github.com/pierreminiggio/php-github-action-run-detailer/issues",
-                "source": "https://github.com/pierreminiggio/php-github-action-run-detailer/tree/1.0.0"
+                "source": "https://github.com/pierreminiggio/php-github-action-run-detailer/tree/1.0.2"
             },
-            "time": "2021-04-29T19:11:06+00:00"
+            "time": "2021-04-29T23:25:46+00:00"
         },
         {
             "name": "pierreminiggio/github-action-runs-lister",
@@ -203,18 +203,17 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/pierreminiggio/php-github-action-runs-lister.git",
-                "reference": "1e4949e0cfc2b71fd69cb82c95cbc375f8947bb7"
+                "reference": "9a48b01db3e32456879141b77b689296b19a88e0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pierreminiggio/php-github-action-runs-lister/zipball/1e4949e0cfc2b71fd69cb82c95cbc375f8947bb7",
-                "reference": "1e4949e0cfc2b71fd69cb82c95cbc375f8947bb7",
+                "url": "https://api.github.com/repos/pierreminiggio/php-github-action-runs-lister/zipball/9a48b01db3e32456879141b77b689296b19a88e0",
+                "reference": "9a48b01db3e32456879141b77b689296b19a88e0",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.4.0",
                 "pierreminiggio/github-action-run": "9999999-dev",
-                "pierreminiggio/github-statuses-enum": "9999999-dev",
                 "pierreminiggio/github-user-agent": "9999999-dev"
             },
             "default-branch": true,
@@ -233,9 +232,9 @@
             ],
             "support": {
                 "issues": "https://github.com/pierreminiggio/php-github-action-runs-lister/issues",
-                "source": "https://github.com/pierreminiggio/php-github-action-runs-lister/tree/2.0.0"
+                "source": "https://github.com/pierreminiggio/php-github-action-runs-lister/tree/2.0.1"
             },
-            "time": "2021-04-29T18:57:05+00:00"
+            "time": "2021-04-29T23:24:50+00:00"
         },
         {
             "name": "pierreminiggio/github-statuses-enum",
