@@ -99,6 +99,17 @@ class GithubActionRunStarterAndArtifactDownloader
             if ($retries === 0) {
                 throw new GithubActionRunStarterAndArtifactDownloaderException("Run {$currentRun->id} failed");
             }
+            
+            return $this->runActionAndGetArtifacts(
+                $token,
+                $owner,
+                $repo,
+                $workflowIdOrWorkflowFileName,
+                $refreshTime,
+                $retries - 1,
+                $inputs,
+                $ref
+            );
         } 
 
         try {
