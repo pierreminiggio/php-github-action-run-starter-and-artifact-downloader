@@ -96,7 +96,9 @@ class GithubActionRunStarterAndArtifactDownloader
         }
 
         if ($currentRun->conclusion !== ConclusionsEnum::SUCCESS) {
-            throw new GithubActionRunStarterAndArtifactDownloaderException("Run {$currentRun->id} failed");
+            if ($retries === 0) {
+                throw new GithubActionRunStarterAndArtifactDownloaderException("Run {$currentRun->id} failed");
+            }
         } 
 
         try {
