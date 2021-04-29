@@ -39,6 +39,7 @@ class GithubActionRunStarterAndArtifactDownloader
         string $repo,
         string $workflowIdOrWorkflowFileName,
         int $refreshTime,
+        ?int $retries = null,
         array $inputs = [],
         string $ref = 'main'
     ): array
@@ -94,7 +95,9 @@ class GithubActionRunStarterAndArtifactDownloader
             $currentRun = $this->runDetailer->find($owner, $repo, $currentRun->id);
         }
 
-        // Check for failure
+        if ($currentRun->conclusion !== ConclusionsEnum::SUCCESS) {
+            throw new GithubActionRunStarterAndArtifactDownloaderException("Run {$currentRun->id} failed");
+        } 
 
         try {
             $artifacts = $this->artifactLister->list($owner, $repo, $currentRun->id);

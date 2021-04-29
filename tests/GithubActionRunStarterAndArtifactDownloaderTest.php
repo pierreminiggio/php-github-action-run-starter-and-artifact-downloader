@@ -11,6 +11,7 @@ use PierreMiniggio\GithubActionRunCreator\GithubActionRunCreator;
 use PierreMiniggio\GithubActionRunDetailer\GithubActionRunDetailer;
 use PierreMiniggio\GithubActionRunsLister\GithubActionRunsLister;
 use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\GithubActionRunStarterAndArtifactDownloader;
+use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\GithubActionRunStarterAndArtifactDownloaderException;
 use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\MostRecentRunFinder;
 use PierreMiniggio\GithubStatusesEnum\ConclusionsEnum;
 use PierreMiniggio\GithubStatusesEnum\GithubStatusesEnum;
@@ -66,13 +67,14 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
             'pierreminiggio',
             'remotion-test-github-action',
             'render-video.yml',
-            0
+            0,
+            null
         );
 
         self::assertSame([$toto, $tutu], $files);
     }
 
-    public function testNormalAction(): void
+    public function testNormalSuccessAction(): void
     {
         $runLister = $this->createMock(GithubActionRunsLister::class);
         $firstList = $this->provideFirstList();
@@ -86,6 +88,7 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
         $loadingCurrentRun->status = GithubStatusesEnum::IN_PROGRESS;
         $completedCurrentRun = clone $queuedCurrentRun;
         $completedCurrentRun->status = GithubStatusesEnum::COMPLETED;
+        $completedCurrentRun->conclusion = ConclusionsEnum::SUCCESS;
         $runDetailer->expects(self::exactly(3))->method('find')->willReturn(
             $queuedCurrentRun,
             $loadingCurrentRun,
@@ -123,10 +126,58 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
             'pierreminiggio',
             'remotion-test-github-action',
             'render-video.yml',
-            0
+            0,
+            null
         );
 
         self::assertSame([$toto], $files);
+    }
+
+    public function testNormalFailedAction(): void
+    {
+        $runLister = $this->createMock(GithubActionRunsLister::class);
+        $firstList = $this->provideFirstList();
+        $secondList = $firstList;
+        $queuedCurrentRun = new GithubActionRun(3, GithubStatusesEnum::QUEUED, ConclusionsEnum::NEUTRAL);
+        $secondList[] = $queuedCurrentRun;
+        $runLister->expects(self::exactly(2))->method('list')->willReturn($firstList, $secondList);
+
+        $runDetailer = $this->createMock(GithubActionRunDetailer::class);
+        $loadingCurrentRun = clone $queuedCurrentRun;
+        $loadingCurrentRun->status = GithubStatusesEnum::IN_PROGRESS;
+        $completedCurrentRun = clone $queuedCurrentRun;
+        $completedCurrentRun->status = GithubStatusesEnum::COMPLETED;
+        $completedCurrentRun->conclusion = ConclusionsEnum::FAILURE;
+        $runDetailer->expects(self::exactly(3))->method('find')->willReturn(
+            $queuedCurrentRun,
+            $loadingCurrentRun,
+            $completedCurrentRun
+        );
+
+        $artifactLister = $this->createMock(GithubActionRunArtifactsLister::class);
+        $artifactLister->expects(self::never())->method('list');
+
+        $artifactDownloader = $this->createMock(GithubActionArtifactDownloader::class);
+        $artifactDownloader->expects(self::never())->method('download');
+
+        $actionRunStarterAndArtifactDownloader = new GithubActionRunStarterAndArtifactDownloader(
+            $runLister,
+            $this->makeCalledOnceCreatorMock(),
+            new MostRecentRunFinder(),
+            $runDetailer,
+            $artifactLister,
+            $artifactDownloader
+        );
+
+        $this->expectException(GithubActionRunStarterAndArtifactDownloaderException::class);
+        $actionRunStarterAndArtifactDownloader->runActionAndGetArtifacts(
+            'token',
+            'pierreminiggio',
+            'remotion-test-github-action',
+            'render-video.yml',
+            0,
+            null
+        );
     }
 
     /**
