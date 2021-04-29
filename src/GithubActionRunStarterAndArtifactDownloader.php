@@ -8,6 +8,8 @@ use PierreMiniggio\GithubActionRunArtifactsLister\GithubActionRunArtifactsLister
 use PierreMiniggio\GithubActionRunCreator\GithubActionRunCreator;
 use PierreMiniggio\GithubActionRunDetailer\GithubActionRunDetailer;
 use PierreMiniggio\GithubActionRunsLister\GithubActionRunsLister;
+use PierreMiniggio\GithubStatusesEnum\ConclusionsEnum;
+use PierreMiniggio\GithubStatusesEnum\GithubStatusesEnum;
 
 class GithubActionRunStarterAndArtifactDownloader
 {
@@ -25,6 +27,7 @@ class GithubActionRunStarterAndArtifactDownloader
 
     /**
      * @param array<string, mixed> $inputs
+     * @param int $refreshTime in seconds
      * 
      * @return string[] artifacts' file paths
      * 
@@ -35,6 +38,7 @@ class GithubActionRunStarterAndArtifactDownloader
         string $owner,
         string $repo,
         string $workflowIdOrWorkflowFileName,
+        int $refreshTime,
         array $inputs = [],
         string $ref = 'main'
     ): array
@@ -79,6 +83,18 @@ class GithubActionRunStarterAndArtifactDownloader
         }
 
         $currentRun = $this->mostRecentRunFinder->find($newRuns);
+
+        while (true) {
+
+            if ($currentRun->status === GithubStatusesEnum::COMPLETED) {
+                break;
+            }
+
+            sleep($refreshTime);
+            $currentRun = $this->runDetailer->find($owner, $repo, $currentRun->id);
+        }
+
+        // Check for failure
 
         try {
             $artifacts = $this->artifactLister->list($owner, $repo, $currentRun->id);
