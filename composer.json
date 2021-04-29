@@ -1,0 +1,34 @@
+{
+    "name": "pierreminiggio/github-action-run-starter-and-artifact-downloader",
+    "description": "",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Pierre MINIGGIO",
+            "email": "pierre@miniggiodev.fr"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.4.0",
+        "pierreminiggio/github-action-runs-lister": "9999999-dev",
+        "pierreminiggio/github-action-run-artifacts-lister": "9999999-dev",
+        "pierreminiggio/github-action-run-creator": "9999999-dev",
+        "pierreminiggio/github-action-artifact-downloader": "9999999-dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "PierreMiniggio\\GithubActionRunStarterAndArtifactDownloader\\": "src/",
+            "PierreMiniggio\\GithubActionRunStarterAndArtifactDownloaderTest\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "bash vendor/bin/phpunit tests/"
+    },
+    "scripts-descriptions": {
+        "test": "Run all tests!"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "10.0.x-dev"
+    }
+}
