@@ -26,9 +26,6 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
         $secondList[] = new GithubActionRun(3, GithubStatusesEnum::COMPLETED, ConclusionsEnum::SUCCESS);
         $runLister->expects(self::exactly(2))->method('list')->willReturn($firstList, $secondList);
 
-        $runCreator = $this->createMock(GithubActionRunCreator::class);
-        $runCreator->expects(self::once())->method('create');
-
         $runDetailer = $this->createMock(GithubActionRunDetailer::class);
         $runDetailer->expects(self::never())->method('find');
 
@@ -57,7 +54,7 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
 
         $actionRunStarterAndArtifactDownloader = new GithubActionRunStarterAndArtifactDownloader(
             $runLister,
-            $runCreator,
+            $this->makeCalledOnceCreatorMock(),
             new MostRecentRunFinder(),
             $runDetailer,
             $artifactLister,
@@ -83,9 +80,6 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
         $queuedCurrentRun = new GithubActionRun(3, GithubStatusesEnum::QUEUED, ConclusionsEnum::NEUTRAL);
         $secondList[] = $queuedCurrentRun;
         $runLister->expects(self::exactly(2))->method('list')->willReturn($firstList, $secondList);
-
-        $runCreator = $this->createMock(GithubActionRunCreator::class);
-        $runCreator->expects(self::once())->method('create');
 
         $runDetailer = $this->createMock(GithubActionRunDetailer::class);
         $loadingCurrentRun = clone $queuedCurrentRun;
@@ -117,7 +111,7 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
 
         $actionRunStarterAndArtifactDownloader = new GithubActionRunStarterAndArtifactDownloader(
             $runLister,
-            $runCreator,
+            $this->makeCalledOnceCreatorMock(),
             new MostRecentRunFinder(),
             $runDetailer,
             $artifactLister,
@@ -144,5 +138,13 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
             new GithubActionRun(1, GithubStatusesEnum::COMPLETED, ConclusionsEnum::SUCCESS),
             new GithubActionRun(2, GithubStatusesEnum::COMPLETED, ConclusionsEnum::SUCCESS),
         ];
+    }
+
+    protected function makeCalledOnceCreatorMock(): GithubActionRunCreator
+    {
+        $mock = $this->createMock(GithubActionRunCreator::class);
+        $mock->expects(self::once())->method('create');
+
+        return $mock;
     }
 }
