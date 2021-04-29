@@ -66,6 +66,8 @@ class GithubActionRunStarterAndArtifactDownloader
             throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
         }
 
+        sleep(10);
+
         try {
             $newRuns = $this->runLister->list(...$runListerArgs);
         } catch (Exception $e) {
@@ -99,7 +101,7 @@ class GithubActionRunStarterAndArtifactDownloader
             if ($retries === 0) {
                 throw new GithubActionRunStarterAndArtifactDownloaderException("Run {$currentRun->id} failed");
             }
-            
+
             return $this->runActionAndGetArtifacts(
                 $token,
                 $owner,
