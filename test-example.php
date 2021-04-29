@@ -10,7 +10,7 @@ $artifacts = $actionRunner->runActionAndGetArtifacts(
     'pierreminiggio',
     'remotion-test-github-action',
     'render-video.yml',
-    3,
+    30,
     0,
     [
         'titleText' => 'Hello from PHP action runner',
