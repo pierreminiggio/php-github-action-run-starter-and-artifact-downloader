@@ -66,7 +66,7 @@ class GithubActionRunStarterAndArtifactDownloader
             throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
         }
 
-        sleep(10);
+        sleep(30);
 
         try {
             $newRuns = $this->runLister->list(...$runListerArgs);
