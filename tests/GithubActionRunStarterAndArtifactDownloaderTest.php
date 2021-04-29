@@ -7,6 +7,7 @@ use PierreMiniggio\GithubActionRunCreator\GithubActionRunCreator;
 use PierreMiniggio\GithubActionRunsLister\GithubActionRun;
 use PierreMiniggio\GithubActionRunsLister\GithubActionRunsLister;
 use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\GithubActionRunStarterAndArtifactDownloader;
+use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\MostRecentRunFinder;
 use PierreMiniggio\GithubStatusesEnum\ConclusionsEnum;
 use PierreMiniggio\GithubStatusesEnum\GithubStatusesEnum;
 
@@ -27,9 +28,13 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
         $runCreator = $this->createMock(GithubActionRunCreator::class);
         $runCreator->expects(self::once())->method('create');
 
+        $runFinder = $this->createMock(MostRecentRunFinder::class);
+        $runFinder->expects(self::once())->method('find');
+
         $actionRunStarterAndArtifactDownloader = new GithubActionRunStarterAndArtifactDownloader(
             $runLister,
-            $runCreator
+            $runCreator,
+            $runFinder
         );
 
         $actionRunStarterAndArtifactDownloader->runActionAndGetArtifacts(

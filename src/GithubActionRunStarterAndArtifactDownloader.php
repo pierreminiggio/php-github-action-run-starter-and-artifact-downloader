@@ -11,7 +11,8 @@ class GithubActionRunStarterAndArtifactDownloader
 
     public function __construct(
         private GithubActionRunsLister $runLister,
-        private GithubActionRunCreator $runCreator
+        private GithubActionRunCreator $runCreator,
+        private MostRecentRunFinder $mostRecentRunFinder
     )
     {
     }
@@ -69,7 +70,7 @@ class GithubActionRunStarterAndArtifactDownloader
             throw new GithubActionRunStarterAndArtifactDownloaderException('More than 1 run was not created ?');
         }
 
-
+        $currentRun = $this->mostRecentRunFinder->find($newRuns);
         
         return [];
     }
