@@ -3,8 +3,12 @@
 namespace PierreMiniggio\GithubActionRunStarterAndArtifactDownloaderTest;
 
 use PHPUnit\Framework\TestCase;
+use PierreMiniggio\GithubActionArtifactDownloader\GithubActionArtifactDownloader;
 use PierreMiniggio\GithubActionRun\GithubActionRun;
+use PierreMiniggio\GithubActionRunArtifactsLister\GithubActionRunArtifact;
+use PierreMiniggio\GithubActionRunArtifactsLister\GithubActionRunArtifactsLister;
 use PierreMiniggio\GithubActionRunCreator\GithubActionRunCreator;
+use PierreMiniggio\GithubActionRunDetailer\GithubActionRunDetailer;
 use PierreMiniggio\GithubActionRunsLister\GithubActionRunsLister;
 use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\GithubActionRunStarterAndArtifactDownloader;
 use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\MostRecentRunFinder;
@@ -14,7 +18,7 @@ use PierreMiniggio\GithubStatusesEnum\GithubStatusesEnum;
 class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
 {
 
-    public function testBlabla(): void
+    public function testIncrediblyFastAction(): void
     {
         $runLister = $this->createMock(GithubActionRunsLister::class);
         $firstList = [
@@ -28,20 +32,48 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
         $runCreator = $this->createMock(GithubActionRunCreator::class);
         $runCreator->expects(self::once())->method('create');
 
-        $runFinder = $this->createMock(MostRecentRunFinder::class);
-        $runFinder->expects(self::once())->method('find');
+        $runDetailer = $this->createMock(GithubActionRunDetailer::class);
+        $runDetailer->expects(self::never())->method('find');
+
+        $artifactLister = $this->createMock(GithubActionRunArtifactsLister::class);
+        $toto = 'toto.mp4';
+        $tutu = 'tutu.mp4';
+        $artifactLister->expects(self::once())->method('list')->willReturn(
+            [
+                new GithubActionRunArtifact(
+                    1,
+                    $toto,
+                    false
+                ),
+                new GithubActionRunArtifact(
+                    1,
+                    $tutu,
+                    false
+                )
+            ]
+        );
+
+        $artifactDownloader = $this->createMock(GithubActionArtifactDownloader::class);
+        $artifactDownloader->expects(self::exactly(2))->method('download')->willReturn(
+            [$toto], [$tutu]
+        );
 
         $actionRunStarterAndArtifactDownloader = new GithubActionRunStarterAndArtifactDownloader(
             $runLister,
             $runCreator,
-            $runFinder
+            new MostRecentRunFinder(),
+            $runDetailer,
+            $artifactLister,
+            $artifactDownloader
         );
 
-        $actionRunStarterAndArtifactDownloader->runActionAndGetArtifacts(
+        $files = $actionRunStarterAndArtifactDownloader->runActionAndGetArtifacts(
             'token',
             'pierreminiggio',
             'remotion-test-github-action',
             'render-video.yml'
         );
+
+        self::assertSame([$toto, $tutu], $files);
     }
 }

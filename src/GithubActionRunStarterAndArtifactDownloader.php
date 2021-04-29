@@ -3,7 +3,10 @@
 namespace PierreMiniggio\GithubActionRunStarterAndArtifactDownloader;
 
 use Exception;
+use PierreMiniggio\GithubActionArtifactDownloader\GithubActionArtifactDownloader;
+use PierreMiniggio\GithubActionRunArtifactsLister\GithubActionRunArtifactsLister;
 use PierreMiniggio\GithubActionRunCreator\GithubActionRunCreator;
+use PierreMiniggio\GithubActionRunDetailer\GithubActionRunDetailer;
 use PierreMiniggio\GithubActionRunsLister\GithubActionRunsLister;
 
 class GithubActionRunStarterAndArtifactDownloader
@@ -12,13 +15,18 @@ class GithubActionRunStarterAndArtifactDownloader
     public function __construct(
         private GithubActionRunsLister $runLister,
         private GithubActionRunCreator $runCreator,
-        private MostRecentRunFinder $mostRecentRunFinder
+        private MostRecentRunFinder $mostRecentRunFinder,
+        private GithubActionRunDetailer $runDetailer,
+        private GithubActionRunArtifactsLister $artifactLister,
+        private GithubActionArtifactDownloader $artifactDownloader
     )
     {
     }
 
     /**
      * @param array<string, mixed> $inputs
+     * 
+     * @return string[] artifacts' file paths
      * 
      * @throws GithubActionRunStarterAndArtifactDownloaderException
      */
@@ -71,7 +79,28 @@ class GithubActionRunStarterAndArtifactDownloader
         }
 
         $currentRun = $this->mostRecentRunFinder->find($newRuns);
+
+        try {
+            $artifacts = $this->artifactLister->list($owner, $repo, $currentRun->id);
+        } catch (Exception $e) {
+            throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
+        }
+
+        $files = [];
+
+        foreach ($artifacts as $artifact) {
+            try {
+                $files = array_merge($files, $this->artifactDownloader->download(
+                    $token,
+                    $owner,
+                    $repo,
+                    $artifact->id
+                ));
+            } catch (Exception $e) {
+                throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
+            } 
+        }
         
-        return [];
+        return $files;
     }
 }
