@@ -39,7 +39,7 @@ class GithubActionRunStarterAndArtifactDownloader
         string $repo,
         string $workflowIdOrWorkflowFileName,
         int $refreshTime,
-        ?int $retries = null,
+        int $retries = 0,
         array $inputs = [],
         string $ref = 'main'
     ): array

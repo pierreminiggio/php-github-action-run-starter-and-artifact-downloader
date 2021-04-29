@@ -68,7 +68,7 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
             'remotion-test-github-action',
             'render-video.yml',
             0,
-            null
+            0
         );
 
         self::assertSame([$toto, $tutu], $files);
@@ -127,7 +127,7 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
             'remotion-test-github-action',
             'render-video.yml',
             0,
-            null
+            0
         );
 
         self::assertSame([$toto], $files);
@@ -176,7 +176,7 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
             'remotion-test-github-action',
             'render-video.yml',
             0,
-            null
+            0
         );
     }
 
