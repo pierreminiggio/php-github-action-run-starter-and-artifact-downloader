@@ -14,7 +14,8 @@
         "pierreminiggio/github-action-runs-lister": "9999999-dev",
         "pierreminiggio/github-action-run-artifacts-lister": "9999999-dev",
         "pierreminiggio/github-action-run-creator": "9999999-dev",
-        "pierreminiggio/github-action-artifact-downloader": "9999999-dev"
+        "pierreminiggio/github-action-artifact-downloader": "9999999-dev",
+        "pierreminiggio/github-action-run-detailer": "9999999-dev"
     },
     "autoload": {
         "psr-4": {

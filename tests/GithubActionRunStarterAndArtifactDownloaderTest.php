@@ -3,8 +3,8 @@
 namespace PierreMiniggio\GithubActionRunStarterAndArtifactDownloaderTest;
 
 use PHPUnit\Framework\TestCase;
+use PierreMiniggio\GithubActionRun\GithubActionRun;
 use PierreMiniggio\GithubActionRunCreator\GithubActionRunCreator;
-use PierreMiniggio\GithubActionRunsLister\GithubActionRun;
 use PierreMiniggio\GithubActionRunsLister\GithubActionRunsLister;
 use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\GithubActionRunStarterAndArtifactDownloader;
 use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\MostRecentRunFinder;

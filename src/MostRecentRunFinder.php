@@ -2,7 +2,7 @@
 
 namespace PierreMiniggio\GithubActionRunStarterAndArtifactDownloader;
 
-use PierreMiniggio\GithubActionRunsLister\GithubActionRun;
+use PierreMiniggio\GithubActionRun\GithubActionRun;
 
 class MostRecentRunFinder
 {

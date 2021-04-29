@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9e8060ccb0f626c69cffaf78e4379989",
+    "content-hash": "7a181ecbb834d97b2153e50c68786802",
     "packages": [
         {
             "name": "pierreminiggio/github-action-artifact-downloader",
@@ -43,6 +43,44 @@
                 "source": "https://github.com/pierreminiggio/php-github-action-artifact-downloader/tree/1.0.0"
             },
             "time": "2021-04-29T10:04:23+00:00"
+        },
+        {
+            "name": "pierreminiggio/github-action-run",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pierreminiggio/php-github-action-run.git",
+                "reference": "23a96a4683179d01d65c4a6e227129c8594aa3b5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pierreminiggio/php-github-action-run/zipball/23a96a4683179d01d65c4a6e227129c8594aa3b5",
+                "reference": "23a96a4683179d01d65c4a6e227129c8594aa3b5",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4.0",
+                "pierreminiggio/github-statuses-enum": "9999999-dev"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PierreMiniggio\\GithubActionRun\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Pierre MINIGGIO",
+                    "email": "pierre@miniggiodev.fr"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/pierreminiggio/php-github-action-run/issues",
+                "source": "https://github.com/pierreminiggio/php-github-action-run/tree/1.0.0"
+            },
+            "time": "2021-04-29T18:50:47+00:00"
         },
         {
             "name": "pierreminiggio/github-action-run-artifacts-lister",
@@ -121,21 +159,61 @@
             "time": "2021-04-29T09:18:28+00:00"
         },
         {
+            "name": "pierreminiggio/github-action-run-detailer",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pierreminiggio/php-github-action-run-detailer.git",
+                "reference": "ced7361daca404f4cf3b27a5aa2a1923aed781f3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pierreminiggio/php-github-action-run-detailer/zipball/ced7361daca404f4cf3b27a5aa2a1923aed781f3",
+                "reference": "ced7361daca404f4cf3b27a5aa2a1923aed781f3",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4.0",
+                "pierreminiggio/github-action-run": "9999999-dev",
+                "pierreminiggio/github-user-agent": "9999999-dev"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PierreMiniggio\\GithubActionRunDetailer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Pierre MINIGGIO",
+                    "email": "pierre@miniggiodev.fr"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/pierreminiggio/php-github-action-run-detailer/issues",
+                "source": "https://github.com/pierreminiggio/php-github-action-run-detailer/tree/1.0.0"
+            },
+            "time": "2021-04-29T19:11:06+00:00"
+        },
+        {
             "name": "pierreminiggio/github-action-runs-lister",
             "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pierreminiggio/php-github-action-runs-lister.git",
-                "reference": "83aedcfff4b564d65eac993cd7f7b4e3dce8413d"
+                "reference": "1e4949e0cfc2b71fd69cb82c95cbc375f8947bb7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pierreminiggio/php-github-action-runs-lister/zipball/83aedcfff4b564d65eac993cd7f7b4e3dce8413d",
-                "reference": "83aedcfff4b564d65eac993cd7f7b4e3dce8413d",
+                "url": "https://api.github.com/repos/pierreminiggio/php-github-action-runs-lister/zipball/1e4949e0cfc2b71fd69cb82c95cbc375f8947bb7",
+                "reference": "1e4949e0cfc2b71fd69cb82c95cbc375f8947bb7",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.4.0",
+                "pierreminiggio/github-action-run": "9999999-dev",
                 "pierreminiggio/github-statuses-enum": "9999999-dev",
                 "pierreminiggio/github-user-agent": "9999999-dev"
             },
@@ -155,9 +233,9 @@
             ],
             "support": {
                 "issues": "https://github.com/pierreminiggio/php-github-action-runs-lister/issues",
-                "source": "https://github.com/pierreminiggio/php-github-action-runs-lister/tree/1.0.0"
+                "source": "https://github.com/pierreminiggio/php-github-action-runs-lister/tree/2.0.0"
             },
-            "time": "2021-04-28T20:20:02+00:00"
+            "time": "2021-04-29T18:57:05+00:00"
         },
         {
             "name": "pierreminiggio/github-statuses-enum",
@@ -1994,6 +2072,7 @@
         "pierreminiggio/github-action-run-artifacts-lister": 20,
         "pierreminiggio/github-action-run-creator": 20,
         "pierreminiggio/github-action-artifact-downloader": 20,
+        "pierreminiggio/github-action-run-detailer": 20,
         "phpunit/phpunit": 20
     },
     "prefer-stable": false,

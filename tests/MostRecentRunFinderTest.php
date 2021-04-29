@@ -3,7 +3,7 @@
 namespace PierreMiniggio\GithubActionRunStarterAndArtifactDownloaderTest;
 
 use PHPUnit\Framework\TestCase;
-use PierreMiniggio\GithubActionRunsLister\GithubActionRun;
+use PierreMiniggio\GithubActionRun\GithubActionRun;
 use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\MostRecentRunFinder;
 use PierreMiniggio\GithubStatusesEnum\ConclusionsEnum;
 use PierreMiniggio\GithubStatusesEnum\GithubStatusesEnum;
