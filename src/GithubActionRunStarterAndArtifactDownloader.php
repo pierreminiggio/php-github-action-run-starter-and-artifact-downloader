@@ -4,6 +4,7 @@ namespace PierreMiniggio\GithubActionRunStarterAndArtifactDownloader;
 
 use Exception;
 use PierreMiniggio\GithubActionArtifactDownloader\GithubActionArtifactDownloader;
+use PierreMiniggio\GithubActionRun\GithubActionRun;
 use PierreMiniggio\GithubActionRunArtifactsLister\GithubActionRunArtifactsLister;
 use PierreMiniggio\GithubActionRunCreator\GithubActionRunCreator;
 use PierreMiniggio\GithubActionRunDetailer\GithubActionRunDetailer;
@@ -13,6 +14,8 @@ use PierreMiniggio\GithubStatusesEnum\GithubStatusesEnum;
 
 class GithubActionRunStarterAndArtifactDownloader
 {
+
+    public int $sleepTimeBetweenRunCreationChecks = 30; // seconds
 
     public function __construct(
         private GithubActionRunsLister $runLister,
@@ -66,26 +69,7 @@ class GithubActionRunStarterAndArtifactDownloader
             throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
         }
 
-        sleep(30);
-
-        try {
-            $newRuns = $this->runLister->list(...$runListerArgs);
-        } catch (Exception $e) {
-            throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
-        }
-
-        $previousRunsCount = count($previousRuns);
-        $newRunsCount = count($newRuns);
-
-        if ($previousRunsCount >= $newRunsCount) {
-            throw new GithubActionRunStarterAndArtifactDownloaderException('Run was not created ?');
-        }
-
-        if ($previousRunsCount + 1 < $newRunsCount) {
-            throw new GithubActionRunStarterAndArtifactDownloaderException('More than 1 run was not created ?');
-        }
-
-        $currentRun = $this->mostRecentRunFinder->find($newRuns);
+        $currentRun = $this->getCreatedRun($runListerArgs, count($previousRuns));
 
         while (true) {
 
@@ -136,5 +120,33 @@ class GithubActionRunStarterAndArtifactDownloader
         }
         
         return $files;
+    }
+
+    /**
+     * @param string[] $runListerArgs [$owner, $repo, $workflowIdOrWorkflowFileName]
+     *
+     * @throws GithubActionRunStarterAndArtifactDownloaderException
+     */
+    protected function getCreatedRun(array $runListerArgs, int $previousRunsCount): GithubActionRun
+    {
+        sleep($this->sleepTimeBetweenRunCreationChecks);
+
+        try {
+            $newRuns = $this->runLister->list(...$runListerArgs);
+        } catch (Exception $e) {
+            throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
+        }
+        
+        $newRunsCount = count($newRuns);
+
+        if ($previousRunsCount >= $newRunsCount) {
+            throw new GithubActionRunStarterAndArtifactDownloaderException('Run was not created ?');
+        }
+
+        if ($previousRunsCount + 1 < $newRunsCount) {
+            throw new GithubActionRunStarterAndArtifactDownloaderException('More than 1 run was not created ?');
+        }
+
+        return $this->mostRecentRunFinder->find($newRuns);
     }
 }
