@@ -76,12 +76,7 @@ class GithubActionRunStarterAndArtifactDownloader
             $this->numberOfRunCreationChecksBeforeAssumingItsNotCreated
         );
 
-        while (true) {
-
-            if ($currentRun->status === GithubStatusesEnum::COMPLETED) {
-                break;
-            }
-
+        while ($currentRun->status !== GithubStatusesEnum::COMPLETED) {
             sleep($refreshTime);
             $currentRun = $this->runDetailer->find($owner, $repo, $currentRun->id);
         }
