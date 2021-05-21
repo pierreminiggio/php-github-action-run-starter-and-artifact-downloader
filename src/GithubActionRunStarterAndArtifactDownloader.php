@@ -15,7 +15,8 @@ use PierreMiniggio\GithubStatusesEnum\GithubStatusesEnum;
 class GithubActionRunStarterAndArtifactDownloader
 {
 
-    public int $sleepTimeBetweenRunCreationChecks = 30; // seconds
+    public int $sleepTimeBetweenRunCreationChecks = 10; // seconds
+    public int $numberOfRunCreationChecksBeforeAssumingItsNotCreated = 10;
 
     public function __construct(
         private GithubActionRunsLister $runLister,
@@ -69,7 +70,11 @@ class GithubActionRunStarterAndArtifactDownloader
             throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
         }
 
-        $currentRun = $this->getCreatedRun($runListerArgs, count($previousRuns));
+        $currentRun = $this->getCreatedRun(
+            $runListerArgs,
+            count($previousRuns),
+            $this->numberOfRunCreationChecksBeforeAssumingItsNotCreated
+        );
 
         while (true) {
 
@@ -127,8 +132,12 @@ class GithubActionRunStarterAndArtifactDownloader
      *
      * @throws GithubActionRunStarterAndArtifactDownloaderException
      */
-    protected function getCreatedRun(array $runListerArgs, int $previousRunsCount): GithubActionRun
+    protected function getCreatedRun(array $runListerArgs, int $previousRunsCount, int $triesLeft): GithubActionRun
     {
+        if ($triesLeft <= 0) {
+            throw new GithubActionRunStarterAndArtifactDownloaderException('Run was not created ?');
+        }
+
         sleep($this->sleepTimeBetweenRunCreationChecks);
 
         try {
@@ -140,7 +149,7 @@ class GithubActionRunStarterAndArtifactDownloader
         $newRunsCount = count($newRuns);
 
         if ($previousRunsCount >= $newRunsCount) {
-            throw new GithubActionRunStarterAndArtifactDownloaderException('Run was not created ?');
+            return $this->getCreatedRun($runListerArgs, $previousRunsCount, $triesLeft - 1);
         }
 
         if ($previousRunsCount + 1 < $newRunsCount) {

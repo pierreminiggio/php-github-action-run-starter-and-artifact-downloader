@@ -249,6 +249,70 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
         self::assertSame([$toto], $files);
     }
 
+    public function testNormalSuccessActionButTook3TriesToSeeItselfCreated(): void
+    {
+        $runLister = $this->createMock(GithubActionRunsLister::class);
+        $firstList = $this->provideFirstList();
+        $secondList = $firstList;
+        $queuedCurrentRun = new GithubActionRun(3, GithubStatusesEnum::QUEUED, ConclusionsEnum::NEUTRAL);
+        $secondList[] = $queuedCurrentRun;
+        $runLister->expects(self::exactly(4))->method('list')->willReturn(
+            $firstList,
+            $firstList,
+            $firstList,
+            $secondList
+        );
+
+        $runDetailer = $this->createMock(GithubActionRunDetailer::class);
+        $loadingCurrentRun = clone $queuedCurrentRun;
+        $loadingCurrentRun->status = GithubStatusesEnum::IN_PROGRESS;
+        $completedCurrentRun = clone $queuedCurrentRun;
+        $completedCurrentRun->status = GithubStatusesEnum::COMPLETED;
+        $completedCurrentRun->conclusion = ConclusionsEnum::SUCCESS;
+        $runDetailer->expects(self::exactly(3))->method('find')->willReturn(
+            $queuedCurrentRun,
+            $loadingCurrentRun,
+            $completedCurrentRun
+        );
+
+        $artifactLister = $this->createMock(GithubActionRunArtifactsLister::class);
+        $toto = 'toto.mp4';
+        $artifactLister->expects(self::once())->method('list')->willReturn(
+            [
+                new GithubActionRunArtifact(
+                    1,
+                    $toto,
+                    false
+                )
+            ]
+        );
+
+        $artifactDownloader = $this->createMock(GithubActionArtifactDownloader::class);
+        $artifactDownloader->expects(self::once())->method('download')->willReturn(
+            [$toto]
+        );
+
+        $actionRunStarterAndArtifactDownloader = new GithubActionRunStarterAndArtifactDownloader(
+            $runLister,
+            $this->makeCalledOnceCreatorMock(),
+            new MostRecentRunFinder(),
+            $runDetailer,
+            $artifactLister,
+            $artifactDownloader
+        );
+
+        $files = $actionRunStarterAndArtifactDownloader->runActionAndGetArtifacts(
+            'token',
+            'pierreminiggio',
+            'remotion-test-github-action',
+            'render-video.yml',
+            0,
+            0
+        );
+
+        self::assertSame([$toto], $files);
+    }
+
     /**
      * @return GithubActionRun[]
      */
