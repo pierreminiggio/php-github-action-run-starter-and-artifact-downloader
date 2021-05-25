@@ -10,6 +10,7 @@ use PierreMiniggio\GithubActionRunArtifactsLister\GithubActionRunArtifactsLister
 use PierreMiniggio\GithubActionRunCreator\GithubActionRunCreator;
 use PierreMiniggio\GithubActionRunDetailer\GithubActionRunDetailer;
 use PierreMiniggio\GithubActionRunsLister\GithubActionRunsLister;
+use PierreMiniggio\GithubActionRunsLister\RunListerResponse;
 use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\GithubActionRunStarterAndArtifactDownloader;
 use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\GithubActionRunStarterAndArtifactDownloaderException;
 use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\MostRecentRunFinder;
@@ -25,7 +26,10 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
         $firstList = $this->provideFirstList();
         $secondList = $firstList;
         $secondList[] = new GithubActionRun(3, GithubStatusesEnum::COMPLETED, ConclusionsEnum::SUCCESS);
-        $runLister->expects(self::exactly(2))->method('list')->willReturn($firstList, $secondList);
+        $runLister->expects(self::exactly(2))->method('list')->willReturn(
+            new RunListerResponse($firstList, count($firstList)),
+            new RunListerResponse($secondList, count($secondList))
+        );
 
         $runDetailer = $this->createMock(GithubActionRunDetailer::class);
         $runDetailer->expects(self::never())->method('find');
@@ -81,7 +85,10 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
         $secondList = $firstList;
         $queuedCurrentRun = new GithubActionRun(3, GithubStatusesEnum::QUEUED, ConclusionsEnum::NEUTRAL);
         $secondList[] = $queuedCurrentRun;
-        $runLister->expects(self::exactly(2))->method('list')->willReturn($firstList, $secondList);
+        $runLister->expects(self::exactly(2))->method('list')->willReturn(
+            new RunListerResponse($firstList, count($firstList)),
+            new RunListerResponse($secondList, count($secondList))
+        );
 
         $runDetailer = $this->createMock(GithubActionRunDetailer::class);
         $loadingCurrentRun = clone $queuedCurrentRun;
@@ -140,7 +147,10 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
         $secondList = $firstList;
         $queuedCurrentRun = new GithubActionRun(3, GithubStatusesEnum::QUEUED, ConclusionsEnum::NEUTRAL);
         $secondList[] = $queuedCurrentRun;
-        $runLister->expects(self::exactly(2))->method('list')->willReturn($firstList, $secondList);
+        $runLister->expects(self::exactly(2))->method('list')->willReturn(
+            new RunListerResponse($firstList, count($firstList)),
+            new RunListerResponse($secondList, count($secondList))
+        );
 
         $runDetailer = $this->createMock(GithubActionRunDetailer::class);
         $loadingCurrentRun = clone $queuedCurrentRun;
@@ -188,10 +198,10 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
         $queuedCurrentRun = new GithubActionRun(3, GithubStatusesEnum::QUEUED, ConclusionsEnum::NEUTRAL);
         $secondList[] = $queuedCurrentRun;
         $runLister->expects(self::exactly(4))->method('list')->willReturn(
-            $firstList,
-            $secondList,
-            $firstList,
-            $secondList
+            new RunListerResponse($firstList, count($firstList)),
+            new RunListerResponse($secondList, count($secondList)),
+            new RunListerResponse($firstList, count($firstList)),
+            new RunListerResponse($secondList, count($secondList))
         );
 
         $runDetailer = $this->createMock(GithubActionRunDetailer::class);
@@ -257,10 +267,10 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
         $queuedCurrentRun = new GithubActionRun(3, GithubStatusesEnum::QUEUED, ConclusionsEnum::NEUTRAL);
         $secondList[] = $queuedCurrentRun;
         $runLister->expects(self::exactly(4))->method('list')->willReturn(
-            $firstList,
-            $firstList,
-            $firstList,
-            $secondList
+            new RunListerResponse($firstList, count($firstList)),
+            new RunListerResponse($firstList, count($firstList)),
+            new RunListerResponse($firstList, count($firstList)),
+            new RunListerResponse($secondList, count($secondList))
         );
 
         $runDetailer = $this->createMock(GithubActionRunDetailer::class);

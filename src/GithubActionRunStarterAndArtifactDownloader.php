@@ -52,7 +52,7 @@ class GithubActionRunStarterAndArtifactDownloader
         $runListerArgs = [$owner, $repo, $workflowIdOrWorkflowFileName];
 
         try {
-            $previousRuns = $this->runLister->list(...$runListerArgs);
+            $previousRunsCount = $this->runLister->list(...$runListerArgs)->totalCount;
         } catch (Exception $e) {
             throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
         }
@@ -72,7 +72,7 @@ class GithubActionRunStarterAndArtifactDownloader
 
         $currentRun = $this->getCreatedRun(
             $runListerArgs,
-            count($previousRuns),
+            $previousRunsCount,
             $this->numberOfRunCreationChecksBeforeAssumingItsNotCreated
         );
 
@@ -136,12 +136,12 @@ class GithubActionRunStarterAndArtifactDownloader
         sleep($this->sleepTimeBetweenRunCreationChecks);
 
         try {
-            $newRuns = $this->runLister->list(...$runListerArgs);
+            $newRunsResponse = $this->runLister->list(...$runListerArgs);
         } catch (Exception $e) {
             throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
         }
         
-        $newRunsCount = count($newRuns);
+        $newRunsCount = $newRunsResponse->totalCount;
 
         if ($previousRunsCount >= $newRunsCount) {
             return $this->getCreatedRun($runListerArgs, $previousRunsCount, $triesLeft - 1);
@@ -151,6 +151,6 @@ class GithubActionRunStarterAndArtifactDownloader
             throw new GithubActionRunStarterAndArtifactDownloaderException('More than 1 run was not created ?');
         }
 
-        return $this->mostRecentRunFinder->find($newRuns);
+        return $this->mostRecentRunFinder->find($newRunsResponse->runs);
     }
 }
