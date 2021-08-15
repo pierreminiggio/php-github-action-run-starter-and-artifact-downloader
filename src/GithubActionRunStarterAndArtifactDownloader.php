@@ -32,9 +32,9 @@ class GithubActionRunStarterAndArtifactDownloader
     /**
      * @param array<string, mixed> $inputs
      * @param int $refreshTime in seconds
-     * 
+     *
      * @return string[] artifacts' file paths
-     * 
+     *
      * @throws GithubActionRunStarterAndArtifactDownloaderException
      */
     public function runActionAndGetArtifacts(
@@ -49,7 +49,7 @@ class GithubActionRunStarterAndArtifactDownloader
     ): array
     {
 
-        $runListerArgs = [$owner, $repo, $workflowIdOrWorkflowFileName];
+        $runListerArgs = [$owner, $repo, $workflowIdOrWorkflowFileName, $token];
 
         try {
             $previousRunsCount = $this->runLister->list(...$runListerArgs)->totalCount;
@@ -78,7 +78,7 @@ class GithubActionRunStarterAndArtifactDownloader
 
         while ($currentRun->status !== GithubStatusesEnum::COMPLETED) {
             sleep($refreshTime);
-            $currentRun = $this->runDetailer->find($owner, $repo, $currentRun->id);
+            $currentRun = $this->runDetailer->find($owner, $repo, $currentRun->id, $token);
         }
 
         if ($currentRun->conclusion !== ConclusionsEnum::SUCCESS) {
@@ -96,10 +96,10 @@ class GithubActionRunStarterAndArtifactDownloader
                 $inputs,
                 $ref
             );
-        } 
+        }
 
         try {
-            $artifacts = $this->artifactLister->list($owner, $repo, $currentRun->id);
+            $artifacts = $this->artifactLister->list($owner, $repo, $currentRun->id, $token);
         } catch (Exception $e) {
             throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
         }
@@ -116,14 +116,14 @@ class GithubActionRunStarterAndArtifactDownloader
                 ));
             } catch (Exception $e) {
                 throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
-            } 
+            }
         }
         
         return $files;
     }
 
     /**
-     * @param string[] $runListerArgs [$owner, $repo, $workflowIdOrWorkflowFileName]
+     * @param string[] $runListerArgs [$owner, $repo, $workflowIdOrWorkflowFileName, ?$token]
      *
      * @throws GithubActionRunStarterAndArtifactDownloaderException
      */
