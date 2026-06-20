@@ -7,6 +7,7 @@ use PierreMiniggio\GithubActionArtifactDownloader\GithubActionArtifactDownloader
 use PierreMiniggio\GithubActionRun\GithubActionRun;
 use PierreMiniggio\GithubActionRunArtifactsLister\GithubActionRunArtifactsLister;
 use PierreMiniggio\GithubActionRunCreator\GithubActionRunCreator;
+use PierreMiniggio\GithubActionRunDeleter\GithubActionRunDeleter;
 use PierreMiniggio\GithubActionRunDetailer\GithubActionRunDetailer;
 use PierreMiniggio\GithubActionRunsLister\GithubActionRunsLister;
 use PierreMiniggio\GithubStatusesEnum\ConclusionsEnum;
@@ -24,7 +25,8 @@ class GithubActionRunStarterAndArtifactDownloader
         private MostRecentRunFinder $mostRecentRunFinder,
         private GithubActionRunDetailer $runDetailer,
         private GithubActionRunArtifactsLister $artifactLister,
-        private GithubActionArtifactDownloader $artifactDownloader
+        private GithubActionArtifactDownloader $artifactDownloader,
+        private GithubActionRunDeleter $runDeleter
     )
     {
     }
@@ -45,7 +47,8 @@ class GithubActionRunStarterAndArtifactDownloader
         int $refreshTime = 30,
         int $retries = 0,
         array $inputs = [],
-        string $ref = 'main'
+        string $ref = 'main',
+        bool $deleteAfterDownloading = false
     ): array
     {
 
@@ -94,7 +97,8 @@ class GithubActionRunStarterAndArtifactDownloader
                 $refreshTime,
                 $retries - 1,
                 $inputs,
-                $ref
+                $ref,
+                $deleteAfterDownloading
             );
         }
 
@@ -119,6 +123,14 @@ class GithubActionRunStarterAndArtifactDownloader
             }
         }
         
+        if ($deleteAfterDownloading) {
+            try {
+                $this->runDeleter->delete($token, $owner, $repo, $currentRun->id);
+            } catch (Exception $e) {
+                throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
+            }
+        }
+
         return $files;
     }
 

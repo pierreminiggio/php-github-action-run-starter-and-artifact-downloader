@@ -8,6 +8,7 @@ use PierreMiniggio\GithubActionRun\GithubActionRun;
 use PierreMiniggio\GithubActionRunArtifactsLister\GithubActionRunArtifact;
 use PierreMiniggio\GithubActionRunArtifactsLister\GithubActionRunArtifactsLister;
 use PierreMiniggio\GithubActionRunCreator\GithubActionRunCreator;
+use PierreMiniggio\GithubActionRunDeleter\GithubActionRunDeleter;
 use PierreMiniggio\GithubActionRunDetailer\GithubActionRunDetailer;
 use PierreMiniggio\GithubActionRunsLister\GithubActionRunsLister;
 use PierreMiniggio\GithubActionRunsLister\RunListerResponse;
@@ -63,7 +64,8 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
             new MostRecentRunFinder(),
             $runDetailer,
             $artifactLister,
-            $artifactDownloader
+            $artifactDownloader,
+            $this->makeNeverCalledDeleterMock()
         );
 
         $files = $actionRunStarterAndArtifactDownloader->runActionAndGetArtifacts(
@@ -125,7 +127,8 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
             new MostRecentRunFinder(),
             $runDetailer,
             $artifactLister,
-            $artifactDownloader
+            $artifactDownloader,
+            $this->makeNeverCalledDeleterMock()
         );
 
         $files = $actionRunStarterAndArtifactDownloader->runActionAndGetArtifacts(
@@ -135,6 +138,149 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
             'render-video.yml',
             0,
             0
+        );
+
+        self::assertSame([$toto], $files);
+    }
+
+    public function testNormalSuccessActionWithDeleteAfterDownloadingDefaultsToFalse(): void
+    {
+        $runLister = $this->createMock(GithubActionRunsLister::class);
+        $firstList = $this->provideFirstList();
+        $secondList = $firstList;
+        $queuedCurrentRun = new GithubActionRun(3, GithubStatusesEnum::QUEUED, ConclusionsEnum::NEUTRAL);
+        $secondList[] = $queuedCurrentRun;
+        $runLister->expects(self::exactly(2))->method('list')->willReturn(
+            new RunListerResponse($firstList, count($firstList)),
+            new RunListerResponse($secondList, count($secondList))
+        );
+
+        $runDetailer = $this->createMock(GithubActionRunDetailer::class);
+        $loadingCurrentRun = clone $queuedCurrentRun;
+        $loadingCurrentRun->status = GithubStatusesEnum::IN_PROGRESS;
+        $completedCurrentRun = clone $queuedCurrentRun;
+        $completedCurrentRun->status = GithubStatusesEnum::COMPLETED;
+        $completedCurrentRun->conclusion = ConclusionsEnum::SUCCESS;
+        $runDetailer->expects(self::exactly(3))->method('find')->willReturn(
+            $queuedCurrentRun,
+            $loadingCurrentRun,
+            $completedCurrentRun
+        );
+
+        $artifactLister = $this->createMock(GithubActionRunArtifactsLister::class);
+        $toto = 'toto.mp4';
+        $artifactLister->expects(self::once())->method('list')->willReturn(
+            [
+                new GithubActionRunArtifact(
+                    1,
+                    $toto,
+                    false
+                )
+            ]
+        );
+
+        $artifactDownloader = $this->createMock(GithubActionArtifactDownloader::class);
+        $artifactDownloader->expects(self::once())->method('download')->willReturn(
+            [$toto]
+        );
+
+        // $runDeleter should never be called, since $deleteAfterDownloading is not passed
+        // and defaults to false
+        $runDeleter = $this->makeNeverCalledDeleterMock();
+
+        $actionRunStarterAndArtifactDownloader = new GithubActionRunStarterAndArtifactDownloader(
+            $runLister,
+            $this->makeCalledOnceCreatorMock(),
+            new MostRecentRunFinder(),
+            $runDetailer,
+            $artifactLister,
+            $artifactDownloader,
+            $runDeleter
+        );
+
+        $files = $actionRunStarterAndArtifactDownloader->runActionAndGetArtifacts(
+            'token',
+            'pierreminiggio',
+            'remotion-test-github-action',
+            'render-video.yml',
+            0,
+            0
+        );
+
+        self::assertSame([$toto], $files);
+    }
+
+    public function testNormalSuccessActionWithDeleteAfterDownloadingSetToTrue(): void
+    {
+        $runLister = $this->createMock(GithubActionRunsLister::class);
+        $firstList = $this->provideFirstList();
+        $secondList = $firstList;
+        $queuedCurrentRun = new GithubActionRun(3, GithubStatusesEnum::QUEUED, ConclusionsEnum::NEUTRAL);
+        $secondList[] = $queuedCurrentRun;
+        $runLister->expects(self::exactly(2))->method('list')->willReturn(
+            new RunListerResponse($firstList, count($firstList)),
+            new RunListerResponse($secondList, count($secondList))
+        );
+
+        $runDetailer = $this->createMock(GithubActionRunDetailer::class);
+        $loadingCurrentRun = clone $queuedCurrentRun;
+        $loadingCurrentRun->status = GithubStatusesEnum::IN_PROGRESS;
+        $completedCurrentRun = clone $queuedCurrentRun;
+        $completedCurrentRun->status = GithubStatusesEnum::COMPLETED;
+        $completedCurrentRun->conclusion = ConclusionsEnum::SUCCESS;
+        $runDetailer->expects(self::exactly(3))->method('find')->willReturn(
+            $queuedCurrentRun,
+            $loadingCurrentRun,
+            $completedCurrentRun
+        );
+
+        $artifactLister = $this->createMock(GithubActionRunArtifactsLister::class);
+        $toto = 'toto.mp4';
+        $artifactLister->expects(self::once())->method('list')->willReturn(
+            [
+                new GithubActionRunArtifact(
+                    1,
+                    $toto,
+                    false
+                )
+            ]
+        );
+
+        $artifactDownloader = $this->createMock(GithubActionArtifactDownloader::class);
+        $artifactDownloader->expects(self::once())->method('download')->willReturn(
+            [$toto]
+        );
+
+        // $runDeleter should be called once, with the completed run's id, since
+        // $deleteAfterDownloading is explicitly set to true
+        $runDeleter = $this->createMock(GithubActionRunDeleter::class);
+        $runDeleter->expects(self::once())->method('delete')->with(
+            'token',
+            'pierreminiggio',
+            'remotion-test-github-action',
+            $completedCurrentRun->id
+        );
+
+        $actionRunStarterAndArtifactDownloader = new GithubActionRunStarterAndArtifactDownloader(
+            $runLister,
+            $this->makeCalledOnceCreatorMock(),
+            new MostRecentRunFinder(),
+            $runDetailer,
+            $artifactLister,
+            $artifactDownloader,
+            $runDeleter
+        );
+
+        $files = $actionRunStarterAndArtifactDownloader->runActionAndGetArtifacts(
+            'token',
+            'pierreminiggio',
+            'remotion-test-github-action',
+            'render-video.yml',
+            0,
+            0,
+            [],
+            'main',
+            true
         );
 
         self::assertSame([$toto], $files);
@@ -176,7 +322,8 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
             new MostRecentRunFinder(),
             $runDetailer,
             $artifactLister,
-            $artifactDownloader
+            $artifactDownloader,
+            $this->makeNeverCalledDeleterMock()
         );
 
         $this->expectException(GithubActionRunStarterAndArtifactDownloaderException::class);
@@ -244,7 +391,8 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
             new MostRecentRunFinder(),
             $runDetailer,
             $artifactLister,
-            $artifactDownloader
+            $artifactDownloader,
+            $this->makeNeverCalledDeleterMock()
         );
 
         $files = $actionRunStarterAndArtifactDownloader->runActionAndGetArtifacts(
@@ -308,7 +456,8 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
             new MostRecentRunFinder(),
             $runDetailer,
             $artifactLister,
-            $artifactDownloader
+            $artifactDownloader,
+            $this->makeNeverCalledDeleterMock()
         );
 
         $files = $actionRunStarterAndArtifactDownloader->runActionAndGetArtifacts(
@@ -346,6 +495,14 @@ class GithubActionRunStarterAndArtifactDownloaderTest extends TestCase
     {
         $mock = $this->createMock(GithubActionRunCreator::class);
         $mock->expects(self::exactly(2))->method('create');
+
+        return $mock;
+    }
+
+    protected function makeNeverCalledDeleterMock(): GithubActionRunDeleter
+    {
+        $mock = $this->createMock(GithubActionRunDeleter::class);
+        $mock->expects(self::never())->method('delete');
 
         return $mock;
     }

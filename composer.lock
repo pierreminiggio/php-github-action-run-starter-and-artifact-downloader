@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "910d5da44f78517b426da0d523baaaa4",
+    "content-hash": "b9a8b5aa7c12429a5a75f4059470a2a6",
     "packages": [
         {
             "name": "pierreminiggio/github-action-artifact-downloader",
@@ -153,6 +153,43 @@
                 "source": "https://github.com/pierreminiggio/php-github-action-run-creator/tree/2.0.0"
             },
             "time": "2022-05-29T20:05:52+00:00"
+        },
+        {
+            "name": "pierreminiggio/github-action-run-deleter",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pierreminiggio/php-github-action-run-deleter.git",
+                "reference": "30cfcba833c386175902d151f11b641df53dbc52"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pierreminiggio/php-github-action-run-deleter/zipball/30cfcba833c386175902d151f11b641df53dbc52",
+                "reference": "30cfcba833c386175902d151f11b641df53dbc52",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4.0",
+                "pierreminiggio/github-user-agent": "^2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PierreMiniggio\\GithubActionRunDeleter\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Pierre MINIGGIO",
+                    "email": "pierre@miniggiodev.fr"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/pierreminiggio/php-github-action-run-deleter/issues",
+                "source": "https://github.com/pierreminiggio/php-github-action-run-deleter/tree/1.0.0"
+            },
+            "time": "2026-06-20T08:55:18+00:00"
         },
         {
             "name": "pierreminiggio/github-action-run-detailer",

@@ -14,7 +14,8 @@
         "pierreminiggio/github-action-run-creator": "^2.0",
         "pierreminiggio/github-action-runs-lister": "^4.0",
         "pierreminiggio/github-action-run-artifacts-lister": "^2.0",
-        "pierreminiggio/github-action-run-detailer": "^2.0"
+        "pierreminiggio/github-action-run-detailer": "^2.0",
+        "pierreminiggio/github-action-run-deleter": "^1.0"
     },
     "autoload": {
         "psr-4": {
