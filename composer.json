@@ -9,7 +9,7 @@
         }
     ],
     "require": {
-        "php": ">=7.4.0",
+        "php": ">=8.0.0",
         "pierreminiggio/github-action-artifact-downloader": "^2.0",
         "pierreminiggio/github-action-run-creator": "^2.0",
         "pierreminiggio/github-action-runs-lister": "^4.0",

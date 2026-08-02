@@ -23,4 +23,23 @@ class GithubActionRunStarterAndArtifactDownloaderFactory
             new GithubActionRunDeleter()
         );
     }
+
+    /**
+     * @param string $ticketEncryptionKey secret key used to encrypt/decrypt run
+     *        tickets. Keep it out of source control (env var, secret manager, ...);
+     *        anyone who has it can decrypt a stored ticket back into a raw Github token.
+     */
+    public function makeAsync(string $ticketEncryptionKey): GithubActionAsyncRunStarterAndArtifactDownloader
+    {
+        return new GithubActionAsyncRunStarterAndArtifactDownloader(
+            new GithubActionRunsLister(),
+            new GithubActionRunCreator(),
+            new MostRecentRunFinder(),
+            new GithubActionRunDetailer(),
+            new GithubActionRunArtifactsLister(),
+            new GithubActionArtifactDownloader(),
+            new GithubActionRunDeleter(),
+            $ticketEncryptionKey
+        );
+    }
 }

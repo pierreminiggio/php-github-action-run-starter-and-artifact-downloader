@@ -2,33 +2,35 @@
 
 namespace PierreMiniggio\GithubActionRunStarterAndArtifactDownloader;
 
-use Exception;
 use PierreMiniggio\GithubActionArtifactDownloader\GithubActionArtifactDownloader;
-use PierreMiniggio\GithubActionRun\GithubActionRun;
 use PierreMiniggio\GithubActionRunArtifactsLister\GithubActionRunArtifactsLister;
 use PierreMiniggio\GithubActionRunCreator\GithubActionRunCreator;
 use PierreMiniggio\GithubActionRunDeleter\GithubActionRunDeleter;
 use PierreMiniggio\GithubActionRunDetailer\GithubActionRunDetailer;
 use PierreMiniggio\GithubActionRunsLister\GithubActionRunsLister;
+use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\Service\ActionRunStarter;
+use PierreMiniggio\GithubActionRunStarterAndArtifactDownloader\Service\RunCompletionResolver;
 use PierreMiniggio\GithubStatusesEnum\ConclusionsEnum;
 use PierreMiniggio\GithubStatusesEnum\GithubStatusesEnum;
 
 class GithubActionRunStarterAndArtifactDownloader
 {
+    use HasRunCreationCheckSettings;
 
-    public int $sleepTimeBetweenRunCreationChecks = 10; // seconds
-    public int $numberOfRunCreationChecksBeforeAssumingItsNotCreated = 10;
+    private RunCompletionResolver $runCompletionResolver;
 
     public function __construct(
-        private GithubActionRunsLister $runLister,
-        private GithubActionRunCreator $runCreator,
-        private MostRecentRunFinder $mostRecentRunFinder,
+        GithubActionRunsLister $runLister,
+        GithubActionRunCreator $runCreator,
+        MostRecentRunFinder $mostRecentRunFinder,
         private GithubActionRunDetailer $runDetailer,
-        private GithubActionRunArtifactsLister $artifactLister,
-        private GithubActionArtifactDownloader $artifactDownloader,
-        private GithubActionRunDeleter $runDeleter
+        GithubActionRunArtifactsLister $artifactLister,
+        GithubActionArtifactDownloader $artifactDownloader,
+        GithubActionRunDeleter $runDeleter
     )
     {
+        $this->runStarter = new ActionRunStarter($runLister, $runCreator, $mostRecentRunFinder);
+        $this->runCompletionResolver = new RunCompletionResolver($artifactLister, $artifactDownloader, $runDeleter);
     }
 
     /**
@@ -51,32 +53,13 @@ class GithubActionRunStarterAndArtifactDownloader
         bool $deleteAfterDownloading = false
     ): array
     {
-
-        $runListerArgs = [$owner, $repo, $workflowIdOrWorkflowFileName, $token];
-
-        try {
-            $previousRunsCount = $this->runLister->list(...$runListerArgs)->totalCount;
-        } catch (Exception $e) {
-            throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
-        }
-
-        try {
-            $this->runCreator->create(
-                $token,
-                $owner,
-                $repo,
-                $workflowIdOrWorkflowFileName,
-                $inputs,
-                $ref
-            );
-        } catch (Exception $e) {
-            throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
-        }
-
-        $currentRun = $this->getCreatedRun(
-            $runListerArgs,
-            $previousRunsCount,
-            $this->numberOfRunCreationChecksBeforeAssumingItsNotCreated
+        $currentRun = $this->runStarter->startAndLocateRun(
+            $token,
+            $owner,
+            $repo,
+            $workflowIdOrWorkflowFileName,
+            $inputs,
+            $ref
         );
 
         while ($currentRun->status !== GithubStatusesEnum::COMPLETED) {
@@ -102,67 +85,6 @@ class GithubActionRunStarterAndArtifactDownloader
             );
         }
 
-        try {
-            $artifacts = $this->artifactLister->list($owner, $repo, $currentRun->id, $token);
-        } catch (Exception $e) {
-            throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
-        }
-
-        $files = [];
-
-        foreach ($artifacts as $artifact) {
-            try {
-                $files = array_merge($files, $this->artifactDownloader->download(
-                    $token,
-                    $owner,
-                    $repo,
-                    $artifact->id
-                ));
-            } catch (Exception $e) {
-                throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
-            }
-        }
-        
-        if ($deleteAfterDownloading) {
-            try {
-                $this->runDeleter->delete($token, $owner, $repo, $currentRun->id);
-            } catch (Exception $e) {
-                throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
-            }
-        }
-
-        return $files;
-    }
-
-    /**
-     * @param string[] $runListerArgs [$owner, $repo, $workflowIdOrWorkflowFileName, ?$token]
-     *
-     * @throws GithubActionRunStarterAndArtifactDownloaderException
-     */
-    protected function getCreatedRun(array $runListerArgs, int $previousRunsCount, int $triesLeft): GithubActionRun
-    {
-        if ($triesLeft <= 0) {
-            throw new GithubActionRunStarterAndArtifactDownloaderException('Run was not created ?');
-        }
-
-        sleep($this->sleepTimeBetweenRunCreationChecks);
-
-        try {
-            $newRunsResponse = $this->runLister->list(...$runListerArgs);
-        } catch (Exception $e) {
-            throw GithubActionRunStarterAndArtifactDownloaderException::makeFromException($e);
-        }
-        
-        $newRunsCount = $newRunsResponse->totalCount;
-
-        if ($previousRunsCount >= $newRunsCount) {
-            return $this->getCreatedRun($runListerArgs, $previousRunsCount, $triesLeft - 1);
-        }
-
-        if ($previousRunsCount + 1 < $newRunsCount) {
-            throw new GithubActionRunStarterAndArtifactDownloaderException('More than 1 run was not created ?');
-        }
-
-        return $this->mostRecentRunFinder->find($newRunsResponse->runs);
+        return $this->runCompletionResolver->resolve($token, $owner, $repo, $currentRun, $deleteAfterDownloading);
     }
 }
